@@ -28,6 +28,11 @@ export default StyleSheet.create({
         backgroundColor: "#00F",
         padding: 10
     },
+    garageButton: {
+        marginVertical: 10,
+        backgroundColor: "#00F",
+        padding: 10
+    },
     iconButtonContainer: {
         margin: 8,
         backgroundColor: "#00F",
@@ -67,4 +72,8 @@ export default StyleSheet.create({
     highlight: {
         fontWeight: '700',
     },
+    textHeader: {
+        color: "#FFF",
+        fontSize: 28
+    }
 });

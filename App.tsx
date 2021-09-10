@@ -10,6 +10,7 @@ import {
 import Settings from './Settings';
 import Home from './Home';
 import Garage from './Garage';
+import Rooms from './Rooms';
 import styles from './AppStyles';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import Globals from './Globals';
@@ -32,7 +33,6 @@ const App = () => {
   const testUrl = async (url: string) => {
     try {
       fetch(url).then((response) => {
-        console.log('test URL: ' + url);
         if(response.status === 200){
           updateApiUrl(url);
           EncryptedStorage.getItem(Globals.API_PIN_CODE_NAME).then((pin) => {
@@ -50,12 +50,10 @@ const App = () => {
         }
 
       }).catch((error) => {
-    console.log('fail');
         updateLoading(false);
         console.log(error)
       });
     } catch (error) {
-    console.log('fail2');
       updateLoading(false);
       console.log(error);
     }
@@ -71,13 +69,13 @@ const App = () => {
       })
       .then(response => {
           if(response.status !== 200){
-            updateApiPIN(pin);
             Alert.alert("There was an error validating the PIN");
             EncryptedStorage.removeItem(Globals.API_PIN_CODE_NAME);
             updateSelectedScreen('Settings');
             updateLoading(false);
             return;
           }else{
+            updateApiPIN(pin);
             response.json().then((data) => {
               if(!data.IsValid){
                 Alert.alert("There was an error validating the PIN");
@@ -89,13 +87,13 @@ const App = () => {
 
               if(firstLoad){
                 //PIN is valid, go to home screen
-                console.log('home?');
                 updateSelectedScreen('Home');
                 updateFirstLoad(false);
               }
+
+              updateLoading(false);
             })
           }
-          updateLoading(false);
       })
       .catch((error) => {
           updateLoading(false);
@@ -136,6 +134,9 @@ const App = () => {
         : null }
         { selectedScreen === 'Garage' ?
           <Garage updateView={updateSelectedScreen} apiEndpoint={apiUrl} apiPIN={apiPIN}></Garage>
+        : null }
+        { selectedScreen === 'Rooms' ?
+          <Rooms updateView={updateSelectedScreen} apiEndpoint={apiUrl} apiPIN={apiPIN}></Rooms>
         : null }
     </SafeAreaView>
   );

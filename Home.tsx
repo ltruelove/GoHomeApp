@@ -24,11 +24,18 @@ const Home = (props: Properties) => {
         props.updateView('Garage');
     }
 
+    const navigateRooms = () => {
+        props.updateView('Rooms');
+    }
+
   return (
     <SafeAreaView style={styles.content}>
       <Text style={styles.textBody}>Home Test</Text>
       <Pressable style={styles.iconButtonContainer} onPress={navigateGarage}>
-          <FontAwesomeIcon icon={faCog} style={styles.iconButton} />
+          <Text style={styles.textButton}>Garage</Text>
+      </Pressable>
+      <Pressable style={styles.iconButtonContainer} onPress={navigateRooms}>
+          <Text style={styles.textButton}>Room Temperatures</Text>
       </Pressable>
       <Pressable style={styles.iconButtonContainer} onPress={navigateSettings}>
           <FontAwesomeIcon icon={faCog} style={styles.iconButton} />
