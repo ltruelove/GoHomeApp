@@ -2,7 +2,7 @@ import React from 'react';
 import {
   SafeAreaView,
   Text,
-  TouchableHighlight
+  Pressable
 } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
@@ -20,12 +20,19 @@ const Home = (props: Properties) => {
         props.updateView('Settings');
     }
 
+    const navigateGarage = () => {
+        props.updateView('Garage');
+    }
+
   return (
     <SafeAreaView style={styles.content}>
       <Text style={styles.textBody}>Home Test</Text>
-      <TouchableHighlight style={styles.iconButtonContainer} onPress={navigateSettings}>
+      <Pressable style={styles.iconButtonContainer} onPress={navigateGarage}>
           <FontAwesomeIcon icon={faCog} style={styles.iconButton} />
-      </TouchableHighlight>
+      </Pressable>
+      <Pressable style={styles.iconButtonContainer} onPress={navigateSettings}>
+          <FontAwesomeIcon icon={faCog} style={styles.iconButton} />
+      </Pressable>
     </SafeAreaView>
   );
 }

@@ -9,6 +9,7 @@ import {
 
 import Settings from './Settings';
 import Home from './Home';
+import Garage from './Garage';
 import styles from './AppStyles';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import Globals from './Globals';
@@ -17,6 +18,8 @@ const App = () => {
   const [selectedScreen, updateSelectedScreen] = React.useState('Settings');
   const [firstLoad, updateFirstLoad] = React.useState(true);
   const [loading, updateLoading] = React.useState(true);
+  const [apiUrl, updateApiUrl] = React.useState('');
+  const [apiPIN, updateApiPIN] = React.useState('');
 
   const clearSettings = () => {
     EncryptedStorage.clear().then(() => {
@@ -31,6 +34,7 @@ const App = () => {
       fetch(url).then((response) => {
         console.log('test URL: ' + url);
         if(response.status === 200){
+          updateApiUrl(url);
           EncryptedStorage.getItem(Globals.API_PIN_CODE_NAME).then((pin) => {
             if(pin){
               checkPIN(pin, url)
@@ -67,6 +71,7 @@ const App = () => {
       })
       .then(response => {
           if(response.status !== 200){
+            updateApiPIN(pin);
             Alert.alert("There was an error validating the PIN");
             EncryptedStorage.removeItem(Globals.API_PIN_CODE_NAME);
             updateSelectedScreen('Settings');
@@ -128,6 +133,9 @@ const App = () => {
         : null }
         { selectedScreen === 'Home' ?
           <Home updateView={updateSelectedScreen}></Home>
+        : null }
+        { selectedScreen === 'Garage' ?
+          <Garage updateView={updateSelectedScreen} apiEndpoint={apiUrl} apiPIN={apiPIN}></Garage>
         : null }
     </SafeAreaView>
   );
