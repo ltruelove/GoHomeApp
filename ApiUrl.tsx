@@ -2,83 +2,127 @@ import React from 'react';
 import {
   SafeAreaView,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   Alert,
+  Switch
 } from 'react-native';
 
 import EncryptedStorage from 'react-native-encrypted-storage';
+import styles from './AppStyles'
+import Globals from './Globals'
 
-const ApiUrl = () => {
-  const [apiUrl, updateApiUrl] = React.useState('http://');
-  const [apiEndpoint, updateApiEndpoint] = React.useState('');
+interface Properties {
+    updateShow: Function
+}
+
+const ApiUrl = (props: Properties) => {
+    const [apiUrl, updateApiUrl] = React.useState('http://');
+    const [apiEndpoint, updateApiEndpoint] = React.useState('');
+    const [apiEndpointPort, updateApiEndpointPort] = React.useState('');
+    const [enterManually, updateEnterManually] = React.useState(false);
 
 
-  async function saveStorageItem(key: string, value: string) {
-    await EncryptedStorage.setItem(key, value);
-  }
-//http://ipsave.levitruelove.com?name=home&list=true
-  const testAPIIP = async () => {
-    try {
-      const response = await fetch(apiUrl);
-      if(response.status === 200){
-        updateApiEndpoint(await response.text());
-      }else{
-        throw new Error('Could not fetch the API domain');
-      }
-    } catch (error) {
-      Alert.alert(error + '');
-      console.error(error);
-    } finally {
-      console.log(apiEndpoint);
-      saveStorageItem('apiEndpoint', apiEndpoint);
+    async function saveStorageItem(key: string, value: string) {
+        await EncryptedStorage.setItem(key, value);
     }
-  }
+
+    const testAPIIP = async (url: string) => {
+        try {
+            const response = await fetch(url);
+            if(response.status === 200){
+                updateApiEndpoint(await response.text());
+            }else{
+                throw new Error('Could not fetch the API domain');
+            }
+        } catch (error) {
+            Alert.alert(error + '');
+            console.error(error);
+            props.updateShow(false);
+        } finally {
+            let fullUrl = 'http://' + apiEndpoint;
+            if(apiEndpointPort){
+                fullUrl += ':' + apiEndpointPort;
+            }
+            saveStorageItem(Globals.API_ENDPOINT_NAME, fullUrl);
+            props.updateShow(true);
+        }
+    }
+
+    const testKnownIP  = async (url: string) => {
+        console.log(url);
+        try {
+            const response = await fetch(url);
+            if(response.status !== 200){
+                throw new Error('Did not get a successful response from the API');
+            }
+        } catch (error) {
+            Alert.alert(error + '');
+            console.error(error);
+            props.updateShow(false);
+        } finally {
+            console.log(url);
+            saveStorageItem(Globals.API_ENDPOINT_NAME, url);
+            props.updateShow(true);
+        }
+    }
+
+    const ipTest = () => {
+        let fullUrl = apiUrl;
+        if(apiEndpointPort){
+            fullUrl += ':' + apiEndpointPort;
+        }
+
+        // if the user knows their api endpoint
+        if(enterManually){
+            testKnownIP(fullUrl);
+        }else{
+            //if the API endpoint is provided by another url
+            testAPIIP(apiUrl);
+        }
+    }
+
+    React.useEffect(() => {
+        EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME).then((result) => {
+            if(result){
+                updateApiEndpoint(result);
+                props.updateShow(true);
+            }
+        });
+    })
+
   return (
-    <SafeAreaView>
-      <Text
-      style={styles.textBody}>Please enter the URL that provides the API location</Text>
-      <TextInput 
-      style={styles.textInput}
-      onChangeText={updateApiUrl}
-      value={apiUrl}></TextInput>
-      <Pressable
-      style={styles.button}
-      onPress={ () => testAPIIP()}>
-        <Text style={styles.textButton}>Submit</Text>
-      </Pressable>
+    <SafeAreaView style={styles.content}>
+        <Text
+        style={styles.textBody}>Please enter the URL that provides the API location.</Text>
+        <TextInput 
+            style={styles.textInput}
+            onChangeText={updateApiUrl}
+            value={apiUrl}></TextInput>
+
+        <Text
+        style={styles.textBody}>Endpoint port, if any.</Text>
+        <TextInput 
+            style={styles.textInput}
+            onChangeText={updateApiEndpointPort}
+            value={apiEndpointPort}
+            keyboardType="numeric"></TextInput>
+        <Text style={styles.textBody}>
+        <Switch
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={enterManually ? "#f5dd4b" : "#f4f3f4"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={updateEnterManually}
+            value={enterManually} 
+            style={styles.switch} /> The URL given is the endpoint.</Text>
+
+        <Pressable
+            style={styles.button}
+            onPress={ () => ipTest()}>
+            <Text style={styles.textButton}>Fetch API Endpoint</Text>
+        </Pressable>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    marginVertical: 12,
-    backgroundColor: "#00F",
-    padding: 10
-  },
-  textButton: {
-    color: '#FFF',
-    fontSize: 14
-  },
-  textBody: {
-    color: '#FFF',
-    fontSize: 14,
-  },
-  textInput: {
-    color: '#333',
-    backgroundColor: '#FFF',
-    width: '100%'
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default ApiUrl;

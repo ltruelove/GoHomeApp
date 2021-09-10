@@ -2,102 +2,131 @@ import React from 'react';
 import {
   SafeAreaView,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   Alert,
 } from 'react-native';
 
 import EncryptedStorage from 'react-native-encrypted-storage';
+import styles from './AppStyles'
+import Globals from './Globals'
 
-const getStorageVal = async (key: string) => {
-    let val = await EncryptedStorage.getItem('apiEndpoint');
-    return val;
-} 
+interface Properties {
+    updateView: Function
+    apiEndpoint: string
+}
 
-const PinCode = () => {
+const PinCode = (props: Properties) => {
     const [number, updateNumber] = React.useState('');
+    const [pinValid, updatePinValid] = React.useState(false);
+
+    const navigateHome = () => {
+        console.log("home test");
+        props.updateView('Home');
+    }
+
+    const validateExistingPIN = async () => {
+        try {
+            EncryptedStorage.getItem(Globals.API_PIN_CODE_NAME).then( (pinString) => {
+                if(!pinString){
+                    updatePinValid(false);
+                    return;
+                }
+
+                const postBody = JSON.stringify({ 'pinCode': pinString })
+
+                fetch(props.apiEndpoint + '/pinValid', {
+                    method: 'POST',
+                    body: postBody
+                })
+                .then(response => {
+                    if(response.status !== 200){
+                        updatePinValid(false);
+                        Alert.alert("There was an error validating the PIN");
+                        EncryptedStorage.removeItem('apiPIN');
+                        return;
+                    }else{
+                        response.json().then((data) => {
+                            if(data){
+                                EncryptedStorage.setItem('apiPIN', pinString);
+                                updatePinValid(true);
+                            }
+                        })
+                    }
+                })
+                .catch((error) => {
+                    console.error('*Error:', error);
+                });
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     const checkPIN = async () => {
-    try {
-        getStorageVal('apiEndpoint').then((apiEndpoint) =>{
-            const apiURL = 'http://' + apiEndpoint + ':8181';
+        try {
             const pinString = number;
-            const postBody = JSON.stringify({ "pinCode" :pinString })
+            const postBody = JSON.stringify({ 'pinCode': pinString })
 
-            fetch(apiURL + '/pinValid', {
+            fetch(props.apiEndpoint + '/pinValid', {
                 method: 'POST',
                 body: postBody
             })
             .then(response => {
                 if(response.status !== 200){
+                    updatePinValid(false);
                     Alert.alert("There was an error validating the PIN");
                     EncryptedStorage.removeItem('apiPIN');
                     return;
                 }else{
-                    return response.json()
-                }
-            })
-            .then(data => {
-                if(data){
-                    EncryptedStorage.setItem('apiPIN', pinString);
+                    response.json().then((data) => {
+                        if(data){
+                            EncryptedStorage.setItem('apiPIN', pinString);
+                            updatePinValid(true);
+                        }
+                    })
                 }
             })
             .catch((error) => {
-                console.error('*****Error:', error);
+                console.error('*****Error***:', error);
             });
-
-        });
-    } catch (error) {
-        console.error(error);
+        } catch (error) {
+            console.error(error);
+        }
     }
-  }
+
+    React.useEffect(() => {
+        validateExistingPIN();
+    })
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.content}>
       <Text
       style={styles.textBody}>Please enter the PIN for your API</Text>
+
       <TextInput 
       style={styles.textInput}
       onChangeText={updateNumber}
       value={number}
       placeholder="PIN"
       keyboardType="numeric"></TextInput>
+
       <Pressable
       style={styles.button}
       onPress={ () => checkPIN()}>
-        <Text style={styles.textButton}>Submit</Text>
+        <Text style={styles.textButton}>Validate PIN</Text>
       </Pressable>
+
+      {pinValid ? 
+        <Pressable
+            style={styles.button}
+            onPress={navigateHome}>
+                <Text style={styles.textButton}>Home</Text>
+            </Pressable>
+       : null}
+
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    marginVertical: 12,
-    backgroundColor: "#00F",
-    padding: 10
-  },
-  textButton: {
-    color: '#FFF',
-    fontSize: 14
-  },
-  textBody: {
-    color: '#FFF',
-    fontSize: 14,
-  },
-  textInput: {
-    color: '#333',
-    backgroundColor: '#FFF',
-    width: '100%'
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default PinCode;
