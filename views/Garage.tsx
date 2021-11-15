@@ -7,7 +7,7 @@ import {
   View
 } from 'react-native';
 
-import styles from './AppStyles'
+import styles from '../AppStyles'
 
 interface Properties {
     updateView: Function,

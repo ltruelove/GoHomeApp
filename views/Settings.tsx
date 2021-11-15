@@ -3,14 +3,15 @@ import React from 'react';
 import {
     Pressable,
     Text,
-    SafeAreaView
+    SafeAreaView,
+    View
 } from 'react-native';
 
 import EncryptedStorage from 'react-native-encrypted-storage';
-import styles from './AppStyles'
-import ApiUrl from './ApiUrl'
+import styles from '../AppStyles'
+import ApiUrl from '../views/ApiUrl'
 import PinCode from './PinCode'
-import Globals from './Globals';
+import Globals from '../Globals';
 
 interface Properties {
     updateView: Function
@@ -47,8 +48,9 @@ const Settings = (props: Properties) => {
 
   return (
     <SafeAreaView style={styles.content}>
-        { renderFields() }
+            <Text style={styles.textHeader}>Settings</Text>
 
+            { renderFields() }
         <Pressable style={styles.iconButtonContainer}
             onPress={clearSettings}  >
             <Text style={styles.textButton}>Clear Settings</Text>

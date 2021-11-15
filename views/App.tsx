@@ -11,9 +11,9 @@ import Settings from './Settings';
 import Home from './Home';
 import Garage from './Garage';
 import Rooms from './Rooms';
-import styles from './AppStyles';
+import styles from '../AppStyles';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import Globals from './Globals';
+import Globals from '../Globals';
 
 const App = () => {
   const [selectedScreen, updateSelectedScreen] = React.useState('Settings');

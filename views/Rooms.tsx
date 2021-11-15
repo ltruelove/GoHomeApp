@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import { format } from 'date-fns'
-import styles from './AppStyles'
+import styles from '../AppStyles'
 import Room from './Room'
 
 interface Properties {

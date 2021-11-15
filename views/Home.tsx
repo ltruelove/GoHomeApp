@@ -8,8 +8,8 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 
-import styles from './AppStyles'
-import Globals from './Globals'
+import styles from '../AppStyles'
+import Globals from '../Globals'
 
 interface Properties {
     updateView: Function

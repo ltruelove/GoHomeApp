@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 
 import EncryptedStorage from 'react-native-encrypted-storage';
-import styles from './AppStyles'
-import Globals from './Globals'
+import styles from '../AppStyles'
+import Globals from '../Globals'
 
 interface Properties {
     updateShow: Function
