@@ -2,7 +2,8 @@ import React from 'react';
 import {
   SafeAreaView,
   Text,
-  Pressable
+  Pressable,
+  View
 } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
@@ -30,16 +31,18 @@ const Home = (props: Properties) => {
 
   return (
     <SafeAreaView style={styles.content}>
-      <Text style={styles.textBody}>Home Test</Text>
-      <Pressable style={styles.iconButtonContainer} onPress={navigateGarage}>
-          <Text style={styles.textButton}>Garage</Text>
-      </Pressable>
-      <Pressable style={styles.iconButtonContainer} onPress={navigateRooms}>
-          <Text style={styles.textButton}>Room Temperatures</Text>
-      </Pressable>
-      <Pressable style={styles.iconButtonContainer} onPress={navigateSettings}>
-          <FontAwesomeIcon icon={faCog} style={styles.iconButton} />
-      </Pressable>
+        <Text style={styles.textBody}></Text>
+        <Pressable style={styles.iconButtonContainer} onPress={navigateGarage}>
+            <Text style={styles.textButton}>Garage</Text>
+        </Pressable>
+        <Pressable style={styles.iconButtonContainer} onPress={navigateRooms}>
+            <Text style={styles.textButton}>Room Temperatures</Text>
+        </Pressable>
+        <Pressable style={styles.iconButtonContainer} onPress={navigateSettings}>
+            <Text style={styles.textButton}>
+              <FontAwesomeIcon icon={faCog} style={styles.iconButton} /> Settings
+            </Text>
+        </Pressable>
     </SafeAreaView>
   );
 }

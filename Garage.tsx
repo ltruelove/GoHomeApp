@@ -3,7 +3,8 @@ import {
   SafeAreaView,
   Pressable,
   Text,
-  Alert
+  Alert,
+  View
 } from 'react-native';
 
 import styles from './AppStyles'
@@ -96,6 +97,16 @@ const Garage = (props: Properties) => {
 
   return (
     <SafeAreaView style={styles.content}>
+        <View style={styles.leftContent}>
+            <View style={styles.leftContentIndent}>
+                <Text style={styles.textHeader}>Garage Status</Text>
+                <Text style={styles.textBody}>Door open: {doorStatus}</Text>
+                <Text style={styles.textBody}>Fahrenheit: {fahrenheit}</Text>
+                <Text style={styles.textBody}>Celcius: {celcius}</Text>
+                <Text style={styles.textBody}>Humidity: {humidity}%</Text>
+            </View>
+        </View>
+
         <Pressable
             style={styles.iconButtonContainer}
             onPress={ () => clickGarageDoorButton()}>
@@ -113,11 +124,6 @@ const Garage = (props: Properties) => {
             onPress={ () => goBackHome()}>
             <Text style={styles.textButton}>Home</Text>
         </Pressable>
-
-        <Text style={styles.textBody}>Door open: {doorStatus}</Text>
-        <Text style={styles.textBody}>Fahrenheit: {fahrenheit}</Text>
-        <Text style={styles.textBody}>Celcius: {celcius}</Text>
-        <Text style={styles.textBody}>Humidity: {humidity}%</Text>
     </SafeAreaView>
   );
 }

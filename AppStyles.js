@@ -17,11 +17,23 @@ export default StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: Colors.darker
+        backgroundColor: Colors.darker,
+        width: '100%'
+    },
+    leftContent: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        backgroundColor: Colors.darker,
+        marginTop: 50
+    },
+    leftContentIndent: {
+        marginLeft: 10
     },
     main: {
         width: '100%',
-        height: '100%'
+        height: '100%',
+        backgroundColor: Colors.darker
     },
     button: {
         marginVertical: 15,
@@ -34,10 +46,12 @@ export default StyleSheet.create({
         padding: 10
     },
     iconButtonContainer: {
+        alignItems: 'center',
         margin: 8,
         backgroundColor: "#00F",
         padding: 20,
-        borderRadius: 8
+        borderRadius: 8,
+        minWidth: 200
     },
     iconButton: {
         color: "#FFF",
@@ -55,6 +69,7 @@ export default StyleSheet.create({
     },
     textInput: {
         marginVertical: 8,
+        marginBottom: 25,
         padding: 10,
         height: 40,
         color: '#333',
@@ -74,6 +89,10 @@ export default StyleSheet.create({
     },
     textHeader: {
         color: "#FFF",
-        fontSize: 28
+        fontSize: 28,
+        marginTop: 15
+    },
+    roomList: {
+        marginTop: 5,
     }
 });

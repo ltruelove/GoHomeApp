@@ -5,6 +5,7 @@ import {
   Text,
   TextInput,
   Alert,
+  View
 } from 'react-native';
 
 import EncryptedStorage from 'react-native-encrypted-storage';
@@ -21,7 +22,6 @@ const PinCode = (props: Properties) => {
     const [pinValid, updatePinValid] = React.useState(false);
 
     const navigateHome = () => {
-        console.log("home test");
         props.updateView('Home');
     }
 
@@ -33,9 +33,45 @@ const PinCode = (props: Properties) => {
                     return;
                 }
 
+                EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME).then( (apiEndpoint) => {
+                    const postBody = JSON.stringify({ 'pinCode': pinString })
+
+                    fetch(apiEndpoint + '/pinValid', {
+                        method: 'POST',
+                        body: postBody
+                    })
+                    .then(response => {
+                        if(response.status !== 200){
+                            updatePinValid(false);
+                            Alert.alert("There was an error validating the PIN");
+                            EncryptedStorage.removeItem('apiPIN');
+                            return;
+                        }else{
+                            response.json().then((data) => {
+                                if(data){
+                                    EncryptedStorage.setItem('apiPIN', pinString);
+                                    updatePinValid(true);
+                                }
+                            })
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('*Error:', error);
+                    });
+                });
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const checkPIN = async () => {
+        try {
+            EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME).then( (apiEndpoint) => {
+                const pinString = number;
                 const postBody = JSON.stringify({ 'pinCode': pinString })
 
-                fetch(props.apiEndpoint + '/pinValid', {
+                fetch(apiEndpoint + '/pinValid', {
                     method: 'POST',
                     body: postBody
                 })
@@ -48,6 +84,7 @@ const PinCode = (props: Properties) => {
                     }else{
                         response.json().then((data) => {
                             if(data){
+                                Alert.alert("PIN Valid!");
                                 EncryptedStorage.setItem('apiPIN', pinString);
                                 updatePinValid(true);
                             }
@@ -55,40 +92,8 @@ const PinCode = (props: Properties) => {
                     }
                 })
                 .catch((error) => {
-                    console.error('*Error:', error);
+                    console.error('*****Error***:', error);
                 });
-            });
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    const checkPIN = async () => {
-        try {
-            const pinString = number;
-            const postBody = JSON.stringify({ 'pinCode': pinString })
-
-            fetch(props.apiEndpoint + '/pinValid', {
-                method: 'POST',
-                body: postBody
-            })
-            .then(response => {
-                if(response.status !== 200){
-                    updatePinValid(false);
-                    Alert.alert("There was an error validating the PIN");
-                    EncryptedStorage.removeItem('apiPIN');
-                    return;
-                }else{
-                    response.json().then((data) => {
-                        if(data){
-                            EncryptedStorage.setItem('apiPIN', pinString);
-                            updatePinValid(true);
-                        }
-                    })
-                }
-            })
-            .catch((error) => {
-                console.error('*****Error***:', error);
             });
         } catch (error) {
             console.error(error);
@@ -101,30 +106,31 @@ const PinCode = (props: Properties) => {
 
   return (
     <SafeAreaView style={styles.content}>
-      <Text
-      style={styles.textBody}>Please enter the PIN for your API</Text>
+        <View style={styles.leftContent}>
+            <Text style={styles.textBody}>Please enter the PIN for your API</Text>
 
-      <TextInput 
-      style={styles.textInput}
-      onChangeText={updateNumber}
-      value={number}
-      placeholder="PIN"
-      keyboardType="numeric"></TextInput>
+            <TextInput 
+            style={styles.textInput}
+            onChangeText={updateNumber}
+            value={number}
+            secureTextEntry={true}
+            placeholder="PIN"
+            keyboardType="numeric"></TextInput>
+        </View>
 
-      <Pressable
-      style={styles.button}
-      onPress={ () => checkPIN()}>
-        <Text style={styles.textButton}>Validate PIN</Text>
-      </Pressable>
-
-      {pinValid ? 
         <Pressable
-            style={styles.button}
+            style={styles.iconButtonContainer}
+            onPress={ () => checkPIN()}>
+            <Text style={styles.textButton}>Validate PIN</Text>
+        </Pressable>
+
+        {pinValid ? 
+        <Pressable
+            style={styles.iconButtonContainer}
             onPress={navigateHome}>
                 <Text style={styles.textButton}>Home</Text>
             </Pressable>
-       : null}
-
+        : null}
     </SafeAreaView>
   );
 }

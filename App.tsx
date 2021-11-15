@@ -30,11 +30,43 @@ const App = () => {
     });
   }
 
+  const fetchAPIURL = async (url: string) => {
+    try {
+      fetch(url).then((response) => {
+        if(response.status === 200){
+          response.text().then((text) => {
+            EncryptedStorage.getItem(Globals.API_ENDPOINT_PORT, (port) => {
+              if(port !== null){
+                text += ':' + port;
+              }
+
+              testUrl('http://' + text);
+            })
+          });
+        }else{
+            updateSelectedScreen('Settings');
+            updateLoading(false);
+            throw new Error('Did not get a successful response from the API Service');
+        }
+
+      }).catch((error) => {
+        updateLoading(false);
+        console.log(error)
+      });
+    } catch (error) {
+      updateLoading(false);
+      console.log(error);
+    }
+
+  }
+
   const testUrl = async (url: string) => {
     try {
       fetch(url).then((response) => {
         if(response.status === 200){
           updateApiUrl(url);
+          //this is really only necessary when using an endpoint service
+          EncryptedStorage.setItem(Globals.API_ENDPOINT_NAME, url);
           EncryptedStorage.getItem(Globals.API_PIN_CODE_NAME).then((pin) => {
             if(pin){
               checkPIN(pin, url)
@@ -106,11 +138,23 @@ const App = () => {
 }
 
   React.useEffect(() => {
-    EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME).then((result) => {
-      if(result){
-        testUrl(result);
+    EncryptedStorage.getItem(Globals.API_USING_ENDPOINT_SERVICE).then((isUsingService) => {
+      if(isUsingService !== 'true'){
+        EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME).then((result) => {
+          if(result){
+            testUrl(result);
+          }else{
+            updateLoading(false);
+          }
+        });
       }else{
-        updateLoading(false);
+        EncryptedStorage.getItem(Globals.API_ENDPOINT_SERVICE_URL).then((result) => {
+          if(result){
+            fetchAPIURL(result);
+          }else{
+            updateLoading(false);
+          }
+        });
       }
     });
   })
@@ -125,7 +169,6 @@ const App = () => {
     </View>
     :
     <SafeAreaView style={styles.main}>
-        <Text style={styles.textBody}>{selectedScreen}</Text>
         { selectedScreen === 'Settings' ?
           <Settings updateView={updateSelectedScreen}></Settings>
         : null }

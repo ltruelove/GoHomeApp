@@ -9,14 +9,23 @@ interface RoomData {
     name: string,
     fahrenheit: string,
     celcius: string,
-    humidity: string
+    humidity: string,
+    error: string
 }
 
 const Room = (props: RoomData) => {
   return (
-    <SafeAreaView style={styles.content}>
+    <SafeAreaView >
         <Text style={styles.textHeader}>{props.name}</Text>
-        <Text style={styles.textBody}>Fahrenheit: {props.fahrenheit}, Celcius: {props.celcius}, Humidity: {props.humidity}%</Text>
+        { !props.error ?
+          <Text style={styles.textBody}>
+            Fahrenheit: {props.fahrenheit}, Celcius: {props.celcius}, Humidity: {props.humidity}%
+          </Text>
+          :
+          <Text style={styles.textBody}>
+            {props.error}
+          </Text>
+        }
     </SafeAreaView>
   );
 }

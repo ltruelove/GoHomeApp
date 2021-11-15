@@ -26,6 +26,14 @@ const Settings = (props: Properties) => {
       });
   }
 
+  const renderFields = () => {
+      if(showPin){
+        return <PinCode updateView={props.updateView} apiEndpoint={apiEndpoint}></PinCode>
+      }else{
+        return <ApiUrl updateShow={updateShowPin}></ApiUrl>
+      }
+  }
+
   React.useEffect(() => {
       EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME).then((result) => {
           if(result){
@@ -39,14 +47,11 @@ const Settings = (props: Properties) => {
 
   return (
     <SafeAreaView style={styles.content}>
-        { showPin ? 
-        <PinCode updateView={props.updateView} apiEndpoint={apiEndpoint}></PinCode>
-        :
-        <ApiUrl updateShow={updateShowPin}></ApiUrl>
-        }
+        { renderFields() }
 
-        <Pressable style={styles.button} onPress={clearSettings}  >
-                <Text style={styles.textButton}>Clear Settings</Text>
+        <Pressable style={styles.iconButtonContainer}
+            onPress={clearSettings}  >
+            <Text style={styles.textButton}>Clear Settings</Text>
         </Pressable>
     </SafeAreaView>
   );

@@ -5,7 +5,8 @@ import {
   Text,
   TextInput,
   Alert,
-  Switch
+  Switch,
+  View
 } from 'react-native';
 
 import EncryptedStorage from 'react-native-encrypted-storage';
@@ -18,7 +19,6 @@ interface Properties {
 
 const ApiUrl = (props: Properties) => {
     const [apiUrl, updateApiUrl] = React.useState('http://');
-    const [apiEndpoint, updateApiEndpoint] = React.useState('');
     const [apiEndpointPort, updateApiEndpointPort] = React.useState('');
     const [enterManually, updateEnterManually] = React.useState(false);
 
@@ -28,10 +28,11 @@ const ApiUrl = (props: Properties) => {
     }
 
     const testAPIIP = async (url: string) => {
+        let responseText = '';
         try {
             const response = await fetch(url);
             if(response.status === 200){
-                updateApiEndpoint(await response.text());
+                responseText = await response.text();
             }else{
                 throw new Error('Could not fetch the API domain');
             }
@@ -40,17 +41,18 @@ const ApiUrl = (props: Properties) => {
             console.error(error);
             props.updateShow(false);
         } finally {
-            let fullUrl = 'http://' + apiEndpoint;
+            let fullUrl = 'http://' + responseText;
             if(apiEndpointPort){
                 fullUrl += ':' + apiEndpointPort;
             }
             saveStorageItem(Globals.API_ENDPOINT_NAME, fullUrl);
+            saveStorageItem(Globals.API_ENDPOINT_SERVICE_URL, url);
+            saveStorageItem(Globals.API_ENDPOINT_PORT, apiEndpointPort);
             props.updateShow(true);
         }
     }
 
     const testKnownIP  = async (url: string) => {
-        console.log(url);
         try {
             const response = await fetch(url);
             if(response.status !== 200){
@@ -82,42 +84,58 @@ const ApiUrl = (props: Properties) => {
         }
     }
 
+    const manuallEnterChange = (val: boolean) => {
+        console.log(val);
+        updateEnterManually(val);
+        EncryptedStorage.setItem(Globals.API_USING_ENDPOINT_SERVICE, val ? 'false' : 'true');
+    }
+
     React.useEffect(() => {
         EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME).then((result) => {
             if(result){
-                updateApiEndpoint(result);
                 props.updateShow(true);
+            }
+        });
+
+        EncryptedStorage.getItem(Globals.API_USING_ENDPOINT_SERVICE).then((result) => {
+            if(result){
+                updateEnterManually(result !== 'true');
+            }else{
+                updateEnterManually(false);
+                EncryptedStorage.setItem(Globals.API_USING_ENDPOINT_SERVICE, 'true');
             }
         });
     })
 
   return (
     <SafeAreaView style={styles.content}>
-        <Text
-        style={styles.textBody}>Please enter the URL that provides the API location.</Text>
-        <TextInput 
-            style={styles.textInput}
-            onChangeText={updateApiUrl}
-            value={apiUrl}></TextInput>
-
-        <Text
-        style={styles.textBody}>Endpoint port, if any.</Text>
-        <TextInput 
-            style={styles.textInput}
-            onChangeText={updateApiEndpointPort}
-            value={apiEndpointPort}
-            keyboardType="numeric"></TextInput>
-        <Text style={styles.textBody}>
-        <Switch
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={enterManually ? "#f5dd4b" : "#f4f3f4"}
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={updateEnterManually}
-            value={enterManually} 
-            style={styles.switch} /> The URL given is the endpoint.</Text>
+        <View style={styles.leftContent}>
+            <Text
+                style={styles.textBody}>
+                    Please enter the URL that provides the API location.</Text>
+            <TextInput 
+                style={styles.textInput}
+                onChangeText={updateApiUrl}
+                value={apiUrl}></TextInput>
+            <Text
+                style={styles.textBody}>Endpoint port, if any.</Text>
+            <TextInput 
+                style={styles.textInput}
+                onChangeText={updateApiEndpointPort}
+                value={apiEndpointPort}
+                keyboardType="numeric"></TextInput>
+            <Text style={styles.textBody}>
+            <Switch
+                trackColor={{ false: "#767577", true: "#81b0ff" }}
+                thumbColor={enterManually ? "#f5dd4b" : "#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={manuallEnterChange}
+                value={enterManually} 
+                style={styles.switch} /> The URL given is the endpoint.</Text>
+        </View>
 
         <Pressable
-            style={styles.button}
+            style={styles.iconButtonContainer}
             onPress={ () => ipTest()}>
             <Text style={styles.textButton}>Fetch API Endpoint</Text>
         </Pressable>

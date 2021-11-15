@@ -4,7 +4,8 @@ import {
   Pressable,
   Text,
   Alert,
-  FlatList
+  FlatList,
+  View
 } from 'react-native';
 
 import { format } from 'date-fns'
@@ -21,7 +22,8 @@ interface RoomData {
     name: string,
     fahrenheit: string,
     celcius: string,
-    humidity: string
+    humidity: string,
+    errorMessage: string
 }
 
 const Rooms = (props: Properties) => {
@@ -53,7 +55,6 @@ const Rooms = (props: Properties) => {
             })
             .then(data => {
                 if(data){
-                    console.log(data);
                     for(var index = 0; index < data.length; index++){
                         data[index].key = 'room' + index;
                     }
@@ -75,19 +76,26 @@ const Rooms = (props: Properties) => {
 
   return (
     <SafeAreaView style={styles.content}>
-        <Text style={styles.textBody}>Room Temperatures</Text>
+        <View style={[styles.leftContent, styles.roomList]}>
+            <Text style={styles.textHeader}>Room Temperatures</Text>
+            
+            <Text style={styles.textBody}>Refreshed: {refreshDate}</Text>
+
+            <FlatList data={roomList}
+                renderItem={({item}) =>
+                    <Room name={item.name}
+                    fahrenheit={item.fahrenheit}
+                    celcius={item.celcius}
+                    humidity={item.humidity}
+                    error={item.errorMessage} /> 
+                }
+            />
+        </View>
         <Pressable
             style={styles.iconButtonContainer}
             onPress={ () => fetchRoomTemperatures() }>
             <Text style={styles.textButton}>Refresh Values</Text>
         </Pressable>
-        
-        <Text style={styles.textBody}>Refreshed: {refreshDate}</Text>
-
-        <FlatList data={roomList}
-        renderItem={({item}) => <Room name={item.name} fahrenheit={item.fahrenheit} celcius={item.celcius} humidity={item.humidity} /> }
-        />
-
         <Pressable
             style={styles.iconButtonContainer}
             onPress={ () => goBackHome()}>
