@@ -13,18 +13,22 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import styles from '../AppStyles'
 import Globals from '../Globals'
 
-interface Properties {
-    updateShow: Function
-}
-
-const ApiUrl = (props: Properties) => {
+const ApiUrlScreen = ({ navigation }) => {
     const [apiUrl, updateApiUrl] = React.useState('http://');
     const [apiEndpointPort, updateApiEndpointPort] = React.useState('');
     const [enterManually, updateEnterManually] = React.useState(false);
-
+    const [showHomeButton, updateShowHomeButton] = React.useState(false);
 
     async function saveStorageItem(key: string, value: string) {
         await EncryptedStorage.setItem(key, value);
+    }
+
+    const goHome = () => {
+        navigation.navigate('Home');
+    }
+
+    const goPin = () => {
+        navigation.navigate('API PIN');
     }
 
     const testAPIIP = async (url: string) => {
@@ -38,17 +42,18 @@ const ApiUrl = (props: Properties) => {
             }
         } catch (error) {
             Alert.alert(error + '');
-            console.error(error);
-            props.updateShow(false);
         } finally {
             let fullUrl = 'http://' + responseText;
             if(apiEndpointPort){
                 fullUrl += ':' + apiEndpointPort;
             }
-            saveStorageItem(Globals.API_ENDPOINT_NAME, fullUrl);
-            saveStorageItem(Globals.API_ENDPOINT_SERVICE_URL, url);
-            saveStorageItem(Globals.API_ENDPOINT_PORT, apiEndpointPort);
-            props.updateShow(true);
+            await saveStorageItem(Globals.API_ENDPOINT_NAME, fullUrl);
+            await saveStorageItem(Globals.API_ENDPOINT_SERVICE_URL, url);
+            await saveStorageItem(Globals.API_ENDPOINT_PORT, apiEndpointPort);
+            updateApiUrl('');
+            updateApiEndpointPort('');
+            updateShowHomeButton(true);
+            goPin();
         }
     }
 
@@ -61,11 +66,10 @@ const ApiUrl = (props: Properties) => {
         } catch (error) {
             Alert.alert(error + '');
             console.error(error);
-            props.updateShow(false);
         } finally {
             console.log(url);
-            saveStorageItem(Globals.API_ENDPOINT_NAME, url);
-            props.updateShow(true);
+            await saveStorageItem(Globals.API_ENDPOINT_NAME, url);
+            updateShowHomeButton(true);
         }
     }
 
@@ -85,27 +89,55 @@ const ApiUrl = (props: Properties) => {
     }
 
     const manuallEnterChange = (val: boolean) => {
-        console.log(val);
         updateEnterManually(val);
         EncryptedStorage.setItem(Globals.API_USING_ENDPOINT_SERVICE, val ? 'false' : 'true');
     }
 
     React.useEffect(() => {
-        EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME).then((result) => {
-            if(result){
-                props.updateShow(true);
-            }
-        });
+        async function TestApiStatus(){
+            let showHome = false;
+            let endpointResult = await EncryptedStorage.getItem(Globals.API_USING_ENDPOINT_SERVICE);
+            let endpointPort = await EncryptedStorage.getItem(Globals.API_ENDPOINT_PORT);
+            let endpointPin = await EncryptedStorage.getItem(Globals.API_PIN_CODE_NAME);
 
-        EncryptedStorage.getItem(Globals.API_USING_ENDPOINT_SERVICE).then((result) => {
-            if(result){
-                updateEnterManually(result !== 'true');
-            }else{
-                updateEnterManually(false);
-                EncryptedStorage.setItem(Globals.API_USING_ENDPOINT_SERVICE, 'true');
+            if(endpointPort){
+                updateApiEndpointPort(endpointPort);
             }
-        });
-    })
+
+            if(endpointResult === 'true'){
+                let endpointService = await EncryptedStorage.getItem(Globals.API_ENDPOINT_SERVICE_URL);
+                if(endpointService){
+                    updateApiUrl(endpointService);
+                    showHome = true;
+
+                    if(endpointPin){
+                        goHome();
+                    }else{
+                        goPin();
+                    }
+                }
+
+                updateEnterManually(false);
+            }else{
+                let result = await EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME);
+                if(result){
+                    showHome = true;
+                    navigation.navigate("API PIN");
+                }
+
+                updateEnterManually(true);
+            }
+
+            updateShowHomeButton(showHome);
+
+
+            if(!endpointResult){
+                await EncryptedStorage.setItem(Globals.API_USING_ENDPOINT_SERVICE, 'true');
+            }
+        }
+
+        TestApiStatus();
+    }, [])
 
   return (
     <SafeAreaView style={styles.content}>
@@ -139,8 +171,16 @@ const ApiUrl = (props: Properties) => {
             onPress={ () => ipTest()}>
             <Text style={styles.textButton}>Fetch API Endpoint</Text>
         </Pressable>
+
+        {showHomeButton? 
+        <Pressable
+            style={styles.iconButtonContainer}
+            onPress={ () => goHome()}>
+            <Text style={styles.textButton}>Home</Text>
+        </Pressable>
+        : null }
     </SafeAreaView>
   );
 }
 
-export default ApiUrl;
+export default ApiUrlScreen;

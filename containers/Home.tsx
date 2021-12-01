@@ -7,26 +7,21 @@ import {
 } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
-
 import styles from '../AppStyles'
-import Globals from '../Globals'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-interface Properties {
-    updateView: Function
-}
-
-const Home = (props: Properties) => {
+const Home = ({ navigation }) => {
 
     const navigateSettings = () => {
-        props.updateView('Settings');
+        navigation.navigate('API Settings');
     }
 
     const navigateGarage = () => {
-        props.updateView('Garage');
+        navigation.navigate('Garage');
     }
 
     const navigateRooms = () => {
-        props.updateView('Rooms');
+        navigation.navigate('Rooms');
     }
 
   return (

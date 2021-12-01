@@ -7,49 +7,40 @@ import {
   View
 } from 'react-native';
 
+import EncryptedStorage from 'react-native-encrypted-storage';
 import styles from '../AppStyles'
+import Globals from '../Globals'
 
-interface Properties {
-    updateView: Function,
-    apiEndpoint: string,
-    apiPIN: string
-}
-
-const Garage = (props: Properties) => {
+const Garage = ({ navigation }) => {
     const [doorStatus, updateDoorStatus] = React.useState('unknown');
     const [humidity, updateHumidity] = React.useState('');
     const [fahrenheit, updateFahrenheit] = React.useState('');
     const [celcius, updateCelcius] = React.useState('');
+    const [pinCode, updatePinCode] = React.useState(''); 
+    const [apiEndpoint, updateApiEndPoint] = React.useState(''); 
 
     const goBackHome = () => {
-        props.updateView('Home');
+        navigation.navigate('Home');
     }
 
     const clickGarageDoorButton = async () => {
         try {
-            const postBody = JSON.stringify({ "pinCode" :props.apiPIN })
+            const postBody = JSON.stringify({ "pinCode" :pinCode })
 
-            console.log(postBody);
-            fetch(props.apiEndpoint + '/clickGarageDoorButton', {
+            let response = await fetch(apiEndpoint + '/clickGarageDoorButton', {
                 method: 'POST',
                 body: postBody
-            })
-            .then(response => {
-                if(response.status !== 200){
-                    Alert.alert("There was an error clicking the garage door button");
-                    return;
-                }else {
-                    response.json().then((data) => {
-                        if(data.IsValid){
-                            Alert.alert("Button clicked successfully!");
-                            console.log(data);
-                        }
-                    })
-                }
-            })
-            .catch((error) => {
-                console.error('*****Error:', error);
             });
+
+            if(!response.ok){
+                Alert.alert("There was an error clicking the garage door button");
+                return;
+            }else {
+                let data = await response.json();
+                if(!data.IsValid){
+                    Alert.alert("Button was not clicked successfully!");
+                }
+            }
         } catch (error) {
             console.error(error);
         }
@@ -64,35 +55,44 @@ const Garage = (props: Properties) => {
 
     const fetchGarageStatus = async () => {
         clearGarageData();
+        let url = await EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME);
         try {
-            fetch(props.apiEndpoint + '/doorStatus')
-            .then(response => {
-                if(response.status !== 200){
-                    Alert.alert("There was an error fetching the garage status");
-                    return;
-                }else{
-                    return response.json();
-                }
-            })
-            .then(data => {
+            let response = await fetch(url + '/doorStatus');
+            if(!response.ok){
+                Alert.alert("There was an error fetching the garage status");
+                return;
+            }else{
+                let data = await response.json();
                 if(data){
                     updateHumidity(data.humidity);
                     updateFahrenheit(data.fahrenheit);
                     updateCelcius(data.celcius);
                     updateDoorStatus(data.doorClosed === 1 ? "No" : "Yes");
                 }
-            })
-            .catch((error) => {
-                console.error('*****Error:', error);
-            });
+            }
         } catch (error) {
             console.error(error);
         }
     }
 
-
     React.useEffect(() => {
-        fetchGarageStatus();
+        async function GetApiValues(){
+            let pin = await EncryptedStorage.getItem(Globals.API_PIN_CODE_NAME);
+            let url = await EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME);
+
+            if(pin && url){
+                await updatePinCode(pin);
+                await updateApiEndPoint(url);
+            }else{
+                navigation.navigate('Home');
+            }
+            
+            setTimeout(() => {
+                fetchGarageStatus();
+            }, 1000);
+        }
+
+        GetApiValues();
     }, [])
 
   return (

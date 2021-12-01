@@ -10,13 +10,10 @@ import {
 
 import { format } from 'date-fns'
 import styles from '../AppStyles'
-import Room from './Room'
-
-interface Properties {
-    updateView: Function,
-    apiEndpoint: string,
-    apiPIN: string
-}
+import Room from '../components/atoms/Room'
+import EncryptedStorage from 'react-native-encrypted-storage';
+import Globals from '../Globals'
+import { NavigationContainer } from '@react-navigation/native';
 
 interface RoomData {
     name: string,
@@ -26,13 +23,13 @@ interface RoomData {
     errorMessage: string
 }
 
-const Rooms = (props: Properties) => {
+const Rooms = ({ navigation }) => {
     let roomDataArray = Array<RoomData>();
     const [roomList, setRoomList] = React.useState(roomDataArray);
     const [refreshDate, setRefreshDate] = React.useState("");
 
     const goBackHome = () => {
-        props.updateView('Home');
+        navigation.navigate('Home');
     }
 
     const getDateString = () => {
@@ -43,17 +40,14 @@ const Rooms = (props: Properties) => {
     const fetchRoomTemperatures = async () => {
         setRoomList([]);
         try {
+            let apiEndpoint = await EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME);
 
-            fetch(props.apiEndpoint + '/temps/all')
-            .then(response => {
-                if(response.status !== 200){
-                    Alert.alert("There was an error fetching the room temperatures");
-                    return;
-                }else{
-                    return response.json();
-                }
-            })
-            .then(data => {
+            let response = await fetch(apiEndpoint + '/temps/all');
+            if(!response.ok){
+                Alert.alert("There was an error fetching the room temperatures");
+                return;
+            }else{
+                let data = await response.json();
                 if(data){
                     for(var index = 0; index < data.length; index++){
                         data[index].key = 'room' + index;
@@ -61,10 +55,7 @@ const Rooms = (props: Properties) => {
                     setRoomList(data);
                     setRefreshDate(getDateString());
                 }
-            })
-            .catch((error) => {
-                console.error('*****Error:', error);
-            });
+            }
         } catch (error) {
             console.error(error);
         }
