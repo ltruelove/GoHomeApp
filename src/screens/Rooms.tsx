@@ -9,10 +9,10 @@ import {
 } from 'react-native';
 
 import { format } from 'date-fns'
-import styles from '../AppStyles'
-import Room from '../components/atoms/Room'
+import styles from '../constants/AppStyles'
+import Room from '../components/molecules/Room'
 import EncryptedStorage from 'react-native-encrypted-storage';
-import Globals from '../Globals'
+import Globals from '../constants/Globals'
 import { NavigationContainer } from '@react-navigation/native';
 
 interface RoomData {
@@ -23,7 +23,7 @@ interface RoomData {
     errorMessage: string
 }
 
-const Rooms = ({ navigation }) => {
+const RoomsScreen = ({ navigation }) => {
     let roomDataArray = Array<RoomData>();
     const [roomList, setRoomList] = React.useState(roomDataArray);
     const [refreshDate, setRefreshDate] = React.useState("");
@@ -68,7 +68,6 @@ const Rooms = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.content}>
         <View style={[styles.leftContent, styles.roomList]}>
-            <Text style={styles.textHeader}>Room Temperatures</Text>
             
             <Text style={styles.textBody}>Refreshed: {refreshDate}</Text>
 
@@ -96,4 +95,4 @@ const Rooms = ({ navigation }) => {
   );
 }
 
-export default Rooms;
+export default RoomsScreen;

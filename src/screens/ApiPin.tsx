@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 
 import EncryptedStorage from 'react-native-encrypted-storage';
-import styles from '../AppStyles'
-import Globals from '../Globals'
+import styles from '../constants/AppStyles'
+import Globals from '../constants/Globals'
 
 const ApiPinScreen = ({ navigation }) => {
     const [number, updateNumber] = React.useState('');

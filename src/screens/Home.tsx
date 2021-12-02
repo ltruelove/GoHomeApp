@@ -7,10 +7,10 @@ import {
 } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
-import styles from '../AppStyles'
+import styles from '../constants/AppStyles'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-const Home = ({ navigation }) => {
+const HomeScreen = ({ navigation }) => {
 
     const navigateSettings = () => {
         navigation.navigate('API Settings');
@@ -26,7 +26,6 @@ const Home = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.content}>
-        <Text style={styles.textBody}></Text>
         <Pressable style={styles.iconButtonContainer} onPress={navigateGarage}>
             <Text style={styles.textButton}>Garage</Text>
         </Pressable>
@@ -42,4 +41,4 @@ const Home = ({ navigation }) => {
   );
 }
 
-export default Home;
+export default HomeScreen;

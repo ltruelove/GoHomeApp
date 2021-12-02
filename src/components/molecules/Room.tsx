@@ -3,7 +3,7 @@ import {
   SafeAreaView,
   Text,
 } from 'react-native';
-import styles from '../../AppStyles'
+import styles from '../../constants/AppStyles'
 
 interface RoomData {
     name: string,

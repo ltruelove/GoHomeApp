@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 
 import EncryptedStorage from 'react-native-encrypted-storage';
-import styles from '../AppStyles'
-import Globals from '../Globals'
+import styles from '../constants/AppStyles'
+import Globals from '../constants/Globals'
 
-const Garage = ({ navigation }) => {
+const GarageScreen = ({ navigation }) => {
     const [doorStatus, updateDoorStatus] = React.useState('unknown');
     const [humidity, updateHumidity] = React.useState('');
     const [fahrenheit, updateFahrenheit] = React.useState('');
@@ -99,7 +99,6 @@ const Garage = ({ navigation }) => {
     <SafeAreaView style={styles.content}>
         <View style={styles.leftContent}>
             <View style={styles.leftContentIndent}>
-                <Text style={styles.textHeader}>Garage Status</Text>
                 <Text style={styles.textBody}>Door open: {doorStatus}</Text>
                 <Text style={styles.textBody}>Fahrenheit: {fahrenheit}</Text>
                 <Text style={styles.textBody}>Celcius: {celcius}</Text>
@@ -128,4 +127,4 @@ const Garage = ({ navigation }) => {
   );
 }
 
-export default Garage;
+export default GarageScreen;

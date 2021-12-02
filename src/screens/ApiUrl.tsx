@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 
 import EncryptedStorage from 'react-native-encrypted-storage';
-import styles from '../AppStyles'
-import Globals from '../Globals'
+import styles from '../constants/AppStyles'
+import Globals from '../constants/Globals'
+import {GetApiUrlFromService, testApiUrl} from '../services/GoHomeAPI';
 
 const ApiUrlScreen = ({ navigation }) => {
     const [apiUrl, updateApiUrl] = React.useState('http://');
@@ -19,8 +20,8 @@ const ApiUrlScreen = ({ navigation }) => {
     const [enterManually, updateEnterManually] = React.useState(false);
     const [showHomeButton, updateShowHomeButton] = React.useState(false);
 
-    async function saveStorageItem(key: string, value: string) {
-        await EncryptedStorage.setItem(key, value);
+    function saveStorageItem(key: string, value: string) {
+        EncryptedStorage.setItem(key, value);
     }
 
     const goHome = () => {
@@ -32,48 +33,44 @@ const ApiUrlScreen = ({ navigation }) => {
     }
 
     const testAPIIP = async (url: string) => {
-        let responseText = '';
         try {
-            const response = await fetch(url);
-            if(response.status === 200){
-                responseText = await response.text();
-            }else{
-                throw new Error('Could not fetch the API domain');
-            }
-        } catch (error) {
-            Alert.alert(error + '');
-        } finally {
+            let responseText = await GetApiUrlFromService(url);
             let fullUrl = 'http://' + responseText;
             if(apiEndpointPort){
                 fullUrl += ':' + apiEndpointPort;
             }
-            await saveStorageItem(Globals.API_ENDPOINT_NAME, fullUrl);
-            await saveStorageItem(Globals.API_ENDPOINT_SERVICE_URL, url);
-            await saveStorageItem(Globals.API_ENDPOINT_PORT, apiEndpointPort);
-            updateApiUrl('');
-            updateApiEndpointPort('');
+
+            saveStorageItem(Globals.API_ENDPOINT_NAME, fullUrl);
+            saveStorageItem(Globals.API_ENDPOINT_SERVICE_URL, url);
+            saveStorageItem(Globals.API_ENDPOINT_PORT, apiEndpointPort);
             updateShowHomeButton(true);
             goPin();
+        } catch (error) {
+            Alert.alert(error + '');
         }
     }
 
     const testKnownIP  = async (url: string) => {
         try {
-            const response = await fetch(url);
-            if(response.status !== 200){
+            const isValid = await testApiUrl(url);
+            if(!isValid){
                 throw new Error('Did not get a successful response from the API');
             }
+
+            saveStorageItem(Globals.API_ENDPOINT_NAME, url);
+            updateShowHomeButton(true);
         } catch (error) {
             Alert.alert(error + '');
             console.error(error);
-        } finally {
-            console.log(url);
-            await saveStorageItem(Globals.API_ENDPOINT_NAME, url);
-            updateShowHomeButton(true);
         }
     }
 
     const ipTest = () => {
+        if(!apiUrl){
+            console.log('no url given');
+            return;
+        }
+
         let fullUrl = apiUrl;
         if(apiEndpointPort){
             fullUrl += ':' + apiEndpointPort;
@@ -132,7 +129,7 @@ const ApiUrlScreen = ({ navigation }) => {
 
 
             if(!endpointResult){
-                await EncryptedStorage.setItem(Globals.API_USING_ENDPOINT_SERVICE, 'true');
+                EncryptedStorage.setItem(Globals.API_USING_ENDPOINT_SERVICE, 'true');
             }
         }
 
@@ -173,11 +170,18 @@ const ApiUrlScreen = ({ navigation }) => {
         </Pressable>
 
         {showHomeButton? 
-        <Pressable
-            style={styles.iconButtonContainer}
-            onPress={ () => goHome()}>
-            <Text style={styles.textButton}>Home</Text>
-        </Pressable>
+        <View>
+            <Pressable
+                style={styles.iconButtonContainer}
+                onPress={ () => goHome()}>
+                <Text style={styles.textButton}>Home</Text>
+            </Pressable>
+            <Pressable
+                style={styles.iconButtonContainer}
+                onPress={ () => goPin()}>
+                <Text style={styles.textButton}>API PIN</Text>
+            </Pressable>
+        </View>
         : null }
     </SafeAreaView>
   );
