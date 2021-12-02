@@ -11,6 +11,7 @@ import {
 import EncryptedStorage from 'react-native-encrypted-storage';
 import styles from '../constants/AppStyles'
 import Globals from '../constants/Globals'
+import { IsPinValid } from '../services/GoHomeAPI';
 
 const ApiPinScreen = ({ navigation }) => {
     const [number, updateNumber] = React.useState('');
@@ -25,6 +26,21 @@ const ApiPinScreen = ({ navigation }) => {
         navigation.navigate("API Settings");
     }
 
+    const checkPINWithValues = async (apiEndpoint: string, apiPinToValidate: string) => {
+        let apiPinValid = await IsPinValid(apiEndpoint, apiPinToValidate);
+        
+        updatePinValid(apiPinValid);
+        if(!apiPinValid){
+            Alert.alert("There was an error validating the PIN");
+            await EncryptedStorage.removeItem('apiPIN');
+            return;
+        }
+
+        await EncryptedStorage.setItem('apiPIN', apiPinToValidate);
+        console.log('testing');
+        return true;
+    }
+
     const validateExistingPIN = async () => {
         try {
             let pinString = await EncryptedStorage.getItem(Globals.API_PIN_CODE_NAME);
@@ -33,27 +49,11 @@ const ApiPinScreen = ({ navigation }) => {
                 return;
             }
 
-            console.log(pinString);
             let apiEndpoint = await EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME);
-                const postBody = JSON.stringify({ 'pinCode': pinString })
-
-            let response = await fetch(apiEndpoint + '/pinValid', {
-                method: 'POST',
-                body: postBody
-            });
-            
-            if(!response.ok){
-                updatePinValid(false);
-                Alert.alert("There was an error validating the PIN");
-                await EncryptedStorage.removeItem('apiPIN');
-                return;
-            }else{
-                let data = await response.json();
-                if(data){
-                    await EncryptedStorage.setItem('apiPIN', pinString);
-                    updatePinValid(true);
-                }
+            if(!apiEndpoint){
+                throw new Error("The API endpoint is invalid");
             }
+            await checkPINWithValues(apiEndpoint, pinString);
         } catch (error) {
             console.error(error);
         }
@@ -62,27 +62,16 @@ const ApiPinScreen = ({ navigation }) => {
     const checkPIN = async () => {
         try {
             let apiEndpoint = await EncryptedStorage.getItem(Globals.API_ENDPOINT_NAME);
+            if(!apiEndpoint){
+                throw new Error("The API endpoint is invalid");
+            }
             const pinString = number;
-            const postBody = JSON.stringify({ 'pinCode': pinString })
+            let apiPinValid = await checkPINWithValues(apiEndpoint, pinString);
 
-            let response = await fetch(apiEndpoint + '/pinValid', {
-                method: 'POST',
-                body: postBody
-            });
-
-            if(!response.ok){
-                updatePinValid(false);
-                Alert.alert("There was an error validating the PIN");
-                EncryptedStorage.removeItem('apiPIN');
-                return;
-            }else{
-                let data = await response.json();
-                if(data){
-                    Alert.alert("PIN Valid!");
-                    await EncryptedStorage.setItem(Globals.API_PIN_CODE_NAME, pinString);
-                    updatePinValid(true);
-                    goHome();
-                }
+            console.log(pinString);
+            console.log(apiPinValid);
+            if(apiPinValid){
+                goHome();
             }
         } catch (error) {
             console.error(error);

@@ -2,13 +2,11 @@ import React from 'react';
 import {
   SafeAreaView,
   Text,
-  Pressable,
-  View
+  Pressable
 } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import styles from '../constants/AppStyles'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const HomeScreen = ({ navigation }) => {
 

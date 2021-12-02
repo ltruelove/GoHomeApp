@@ -13,7 +13,6 @@ import styles from '../constants/AppStyles'
 import Room from '../components/molecules/Room'
 import EncryptedStorage from 'react-native-encrypted-storage';
 import Globals from '../constants/Globals'
-import { NavigationContainer } from '@react-navigation/native';
 
 interface RoomData {
     name: string,

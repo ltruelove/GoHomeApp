@@ -12,7 +12,7 @@ import {
 import EncryptedStorage from 'react-native-encrypted-storage';
 import styles from '../constants/AppStyles'
 import Globals from '../constants/Globals'
-import {GetApiUrlFromService, testApiUrl} from '../services/GoHomeAPI';
+import {GetApiUrlFromService, TestApiUrl} from '../services/GoHomeAPI';
 
 const ApiUrlScreen = ({ navigation }) => {
     const [apiUrl, updateApiUrl] = React.useState('http://');
@@ -52,7 +52,7 @@ const ApiUrlScreen = ({ navigation }) => {
 
     const testKnownIP  = async (url: string) => {
         try {
-            const isValid = await testApiUrl(url);
+            const isValid = await TestApiUrl(url);
             if(!isValid){
                 throw new Error('Did not get a successful response from the API');
             }
